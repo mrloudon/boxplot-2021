@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<!-- https://psylab.massey.ac.nz/175_203/pn/boxplot/ old version -->
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Box Plot 175.203</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/ico" href="favicon.ico" sizes="16x16">
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/template.css">
+    <!-- <script src="src/jquery-1.11.1.min.js"></script> -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <!-- <script src="https://code.highcharts.com/modules/export-data.js"></script> -->
+    <script type="module" src="src/main.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!----------------------------------------------------------------------------------------------------->
+        <div class="jumbotron text-center">
+            <h3>Box Plot</h3>
+            <h6 id="sub-heading">175.203 - Introduction to Psychological Research</h6>
+        </div>
+        <!----------------------------------------------------------------------------------------------------->
+        <div class="page-content" id="first-page">
+            <h5 class="text-center py-2">Use this tool to generate and save box plots.</h5>
+            <p>
+                Enter some data into the form below and click <strong>Plot</strong>. The tool will then generate a box
+                plot using the
+                data provided.
+            </p>
+            <p>
+                Each row of data corresponds to a single data set. You can have more than one data set by clicking
+                <strong>Add Row</strong> as required. Clicking the <strong>Delete Row</strong> button will delete the
+                last row from the table.
+                Only one row (data set) is shown by default but you can have as many as you want.
+            </p>
+            <p>
+                Enter a title and a Y axis label for your plot in the text areas provided. You can also choose to add a
+                comment which will appear below the plot if desired.
+            </p>
+            <p>
+                You can enter multiple outliers by separating the values by commas. When you are happy with your plot
+                you can print or download it by clicking the<span class="px-2"><img src="bars-black.png"
+                        alt=""></span>icon at the top right corner of the plot.
+            </p>
+            <div class="input-group mb-3">
+                <span class="input-group-text px-4">Plot Title</span>
+                <input type="text" class="form-control plot-title-input" placeholder="Enter your plot title here">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text px-4">Y Axis Label</span>
+                <input type="text" class="form-control y-title-input" placeholder="Enter your Y-axis label here">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text px-4">X Axis Label</span>
+                <input type="text" class="form-control x-title-input"
+                    placeholder="Enter your X-axis label here">
+            </div>
+            <table id="table1" class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Dataset<br>Name</th>
+                        <th>Minimum</th>
+                        <th>Lower<br>Quartile</th>
+                        <th>Median</th>
+                        <th>Upper<br>Quartile</th>
+                        <th>Maximum</th>
+                        <th>Outliers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="dataset data-table" contenteditable="true"></td>
+                        <td class="minimum data-table" contenteditable="true"></td>
+                        <td class="lower data-table" contenteditable="true"></td>
+                        <td class="median data-table" contenteditable="true"></td>
+                        <td class="upper data-table" contenteditable="true"></td>
+                        <td class="maximum data-table" contenteditable="true"></td>
+                        <td class="outliers data-table" contenteditable="true"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="text-center">
+                <button type="button" class="btn btn-primary add-row">Add Row</button>
+                <button type="button" class="btn btn-primary delete-row">Delete Last Row</button>
+                <button type="button" class="btn btn-primary plot">Plot</button>
+            </div>
+            <div id="box-plot" class="page-content">
+
+            </div>
+        </div>
+        <!----------------------------------------------------------------------------------------------------->
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="english">
+                        <a href="http://psychology.massey.ac.nz">SCHOOL OF PSYCHOLOGY</a>
+                    </div>
+                    <div class="te-reo">
+                        <a href="http://psychology.massey.ac.nz">TE KURA HINENGARO TANGATA</a>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <a href="http://massey.ac.nz" class="footer-logo">
+                        <img src="footerLogo.png">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!----------------------------------------------------------------------------------------------------->
+    </div>
+</body>
+
+</html>
