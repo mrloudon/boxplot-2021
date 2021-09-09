@@ -11,6 +11,7 @@ function doFirstPage() {
     const plotBtn = page.querySelector(".plot");
     const tableBody = page.querySelector("tbody");
     const plotDiv = document.getElementById("box-plot");
+    const alertDiv = document.getElementById("warning-alert");
 
     function addRow() {
         const rowHTML = `
@@ -29,11 +30,6 @@ function doFirstPage() {
 
     function deleteRow() {
         console.log(document.activeElement);
-    }
-
-    function getOutliers() {
-        const outlierCells = page.querySelectorAll("td.outliers");
-        outlierCells.forEach(cell => console.log(cell.innerHTML));
     }
 
     function plotBoxPlot(params) {
@@ -93,36 +89,108 @@ function doFirstPage() {
             data: []
         };
 
-        function validateTable(){
-            let tds, rowData, value;
-            const rows = tableBody.querySelectorAll("tr");
-            const results = {
-                categories: [], 
-                overallData: [],
-                ok: false
-            };
-            rows.forEach(row => {
-                rowData = [];
-                tds = row.querySelectorAll("td");
-                tds.forEach(td => td.style.backgroundColor = BG_COLOR);
-                results.categories.push(tds[0].innerText || "");
-                for(let i = 1; i < 6; i++){
-                    value = Number(tds[i].innerText);
-                    if(isNaN(value) || tds[i].innerText.trim() === ""){
-                        tds[i].style.backgroundColor = WARNING_COLOR;
-                        tds[i].focus();
-                        return;
-                    }
-                    rowData.push(Number(tds[i].innerText))
-                }
-                results.overallData.push(rowData);
-                results.ok = true;
-            });
-            
-            return results;
+        function getOutliers() {
+            const outlierCells = page.querySelectorAll("td.outliers");
+            outlierCells.forEach(cell => console.log(cell.innerHTML));
         }
 
-        const results = validateTable();
+        function validateRowData(rowData, rowNum) {
+            const result = {
+                ok: true,
+                errorMsg: ""
+            };
+
+            if (rowData[0] > rowData[1]) {
+                result.ok = false;
+                result.errorMsg = "<strong>Error in row " + rowNum + ":</strong> Minimum > Lower Quartile";
+                return result;
+            }
+            if (rowData[1] > rowData[2]) {
+                result.ok = false;
+                result.errorMsg = "<strong>Error in row " + rowNum + ":</strong> Lower Quartile > Median";
+                return result;
+            }
+            if (rowData[2] > rowData[3]) {
+                result.ok = false;
+                result.errorMsg = "<strong>Error in row " + rowNum + ":</strong> Median > Upper Quartile";
+                return result;
+            }
+            if (rowData[3] > rowData[4]) {
+                result.ok = false;
+                result.errorMsg = "<strong>Error in row " + rowNum + ":</strong> Upper Quartile > Maximum";
+                return result;
+            }
+            return result;
+        }
+
+        function validateRow(row, rowNum) {
+            const tds = row.querySelectorAll("td");
+            const rowResult = {
+                ok: true,
+                category: "",
+                rowData: [],
+                errorMsg: ""
+            };
+            let rowDataResult, value;
+
+            tds.forEach(td => td.style.backgroundColor = BG_COLOR);
+            rowResult.category = tds[0].innerText || "";
+            for (let j = 1; j < 6; j++) {
+                value = Number(tds[j].innerText);
+                if (isNaN(value) || tds[j].innerText.trim() === "") {
+                    rowResult.ok = false;
+                    tds[j].style.backgroundColor = WARNING_COLOR;
+                    tds[j].focus();
+                    return rowResult;
+                }
+                rowResult.rowData.push(value);
+            }
+
+            rowDataResult = validateRowData(rowResult.rowData, rowNum);
+            if (rowDataResult.ok) {
+                rowResult.errorMsg = "";
+            }
+            else {
+                rowResult.errorMsg = rowDataResult.errorMsg;
+                rowResult.ok = false;
+            }
+            return rowResult;
+        }
+
+        function validateTable() {
+            const rows = tableBody.querySelectorAll("tr");
+            let rowResult;
+            // needs to be a for loop cause forEach has no break equivalent
+            for (let i = 0; i < rows.length; i++) {
+                rowResult = validateRow(rows[i], (i + 1));
+                console.log(rowResult);
+                if (!rowResult.ok) {
+                    if (rowResult.errorMsg) {
+                        console.log(alertDiv);
+                        alertDiv.innerHTML = rowResult.errorMsg;
+                        alertDiv.classList.remove("d-none");
+                    }
+                    return false;
+                }
+                else{
+                    params.categories.push(rowResult.category);
+                    params.data.push(rowResult.rowData);
+                }
+            }
+
+            return true;
+        }
+
+        alertDiv.classList.add("d-none");
+        if(validateTable()){
+            plotBoxPlot(params);
+            plotDiv.classList.remove("d-none");
+        }
+        else{
+            plotDiv.classList.add("d-none");
+        }
+
+        /* const results = validateTable();
         if(results.ok){
             params.categories = results.categories;
             params.data = results.overallData;
@@ -132,7 +200,7 @@ function doFirstPage() {
         else{
             Utility.fadeOut(plotDiv);
         }
-        getOutliers();
+        getOutliers(); */
     }
 
     Utility.fadeIn(page)
