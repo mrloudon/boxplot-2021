@@ -68,7 +68,7 @@ function doFirstPage() {
                 type: 'scatter',
                 data: params.outliers,
                 marker: {
-                    fillColor: 'white',
+                    fillColor: '#7CB5EC',
                     lineWidth: 1,
                     lineColor: Highcharts.getOptions().colors[0]
                 },
@@ -86,12 +86,50 @@ function doFirstPage() {
             yAxisLabel: page.querySelector("input.y-title-input").value.trim(),
             xAxisLabel: page.querySelector("input.x-title-input").value.trim(),
             categories: [],
+            outliers: [],
             data: []
         };
 
+        function validateOutliers(splits) {
+            let i, j, temp, errorMsg = "", 
+                ok = true, outliers = [];
+
+            for (i = 0; i < splits.length; i++) {
+                for (j = 0; j < splits[i].length; j++) {
+                    temp = Number(splits[i][j]);
+                    if (isNaN(temp)) {
+                        errorMsg = "Bad outlier in row: " + (i + 1);
+                        ok = false;
+                        break;
+                    }
+                    /*
+                     * Empty cells evaluate to 0 which could be a valid outlier
+                     * Need to test for empty cell and skip if found.
+                     */
+                    if (splits[i][j].trim() === "") {
+                        break;
+                    }
+                    /*
+                     * Now we have a non empty cell containing valid data
+                     */
+                    outliers.push([i, temp]);
+                }
+                if (!ok) {
+                    break;
+                }
+            }
+            return {
+                ok,
+                errorMsg,
+                outliers
+            };
+        }
+
         function getOutliers() {
             const outlierCells = page.querySelectorAll("td.outliers");
-            outlierCells.forEach(cell => console.log(cell.innerHTML));
+            const splits = [];
+            outlierCells.forEach(cell => splits.push(cell.innerText.trim().split(",")));
+            return splits;
         }
 
         function validateRowData(rowData, rowNum) {
@@ -159,34 +197,43 @@ function doFirstPage() {
 
         function validateTable() {
             const rows = tableBody.querySelectorAll("tr");
-            let rowResult;
+            let rowResult, splits, outliers;
             // needs to be a for loop cause forEach has no break equivalent
             for (let i = 0; i < rows.length; i++) {
                 rowResult = validateRow(rows[i], (i + 1));
                 console.log(rowResult);
                 if (!rowResult.ok) {
                     if (rowResult.errorMsg) {
-                        console.log(alertDiv);
                         alertDiv.innerHTML = rowResult.errorMsg;
                         alertDiv.classList.remove("d-none");
                     }
                     return false;
                 }
-                else{
+                else {
                     params.categories.push(rowResult.category);
                     params.data.push(rowResult.rowData);
                 }
             }
 
-            return true;
+            splits = getOutliers();
+            outliers = validateOutliers(splits);
+            if (outliers.ok) {
+                params.outliers = outliers.outliers;
+                return true;
+            }
+            else {
+                alertDiv.innerHTML = outliers.errorMsg;
+                alertDiv.classList.remove("d-none");
+                return false;
+            }
         }
 
         alertDiv.classList.add("d-none");
-        if(validateTable()){
+        if (validateTable()) {
             plotBoxPlot(params);
             plotDiv.classList.remove("d-none");
         }
-        else{
+        else {
             plotDiv.classList.add("d-none");
         }
 
