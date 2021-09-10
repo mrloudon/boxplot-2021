@@ -3,6 +3,39 @@ import * as Utility from "./utility.mjs";
 const BG_COLOR = "#fafafa";
 const WARNING_COLOR = "#FFC0CB";
 
+function log() {
+    let browser, params;
+    const url = "https://psychlab.massey.ac.nz/ml/submit.php";
+    const isMobile = {
+        Android: function () {
+            return navigator.userAgent.match(/Android/i) ? true : false;
+        },
+        BlackBerry: function () {
+            return navigator.userAgent.match(/BlackBerry/i) ? true : false;
+        },
+        iOS: function () {
+            return navigator.userAgent.match(/iPhone|iPad|iPod/i) ? true : false;
+        },
+        Windows: function () {
+            return navigator.userAgent.match(/IEMobile/i) ? true : false;
+        },
+        any: function () {
+            return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Windows());
+        }
+    };
+    browser = navigator.userAgent.trim().replace(/,/g, ';');
+    browser += (',' + isMobile.any());
+    params = {
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `text=${browser}`,
+        method: "POST"
+    };
+    fetch(url, params)
+        .then(res => console.log(res));
+}
+
 function doFirstPage() {
     const page = document.getElementById("first-page");
     const titleInput = page.querySelector(".plot-title-input");
@@ -91,7 +124,7 @@ function doFirstPage() {
         };
 
         function validateOutliers(splits) {
-            let i, j, temp, errorMsg = "", 
+            let i, j, temp, errorMsg = "",
                 ok = true, outliers = [];
 
             for (i = 0; i < splits.length; i++) {
@@ -265,6 +298,7 @@ function run() {
     $.post("count.php",{browser:  browser},function(response){ 
         console.log("Server response: " + response);
     }); */
+    log();
     doFirstPage();
 }
 
