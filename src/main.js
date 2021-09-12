@@ -2,10 +2,11 @@ import * as Utility from "./utility.mjs";
 
 const BG_COLOR = "#fafafa";
 const WARNING_COLOR = "#FFC0CB";
+let params;
 
 function log() {
-    let browser, params;
-    const url = "https://psychlab.massey.ac.nz/ml/submit.php";
+    let browser, fetchParams;
+    const url = "submit.php";
     const isMobile = {
         Android: function () {
             return navigator.userAgent.match(/Android/i) ? true : false;
@@ -25,14 +26,14 @@ function log() {
     };
     browser = navigator.userAgent.trim().replace(/,/g, ';');
     browser += (',' + isMobile.any());
-    params = {
+    fetchParams = {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         },
         body: `text=${browser}`,
         method: "POST"
     };
-    fetch(url, params)
+    fetch(url, fetchParams)
         .then(res => console.log(res));
 }
 
@@ -45,6 +46,15 @@ function doFirstPage() {
     const tableBody = page.querySelector("tbody");
     const plotDiv = document.getElementById("box-plot");
     const alertDiv = document.getElementById("warning-alert");
+
+    params = {
+        title: "",
+        yAxisLabel: "",
+        xAxisLabel: "",
+        categories: [],
+        outliers: [],
+        data: []
+    };
 
     function addRow() {
         const rowHTML = `
@@ -65,63 +75,7 @@ function doFirstPage() {
         console.log(document.activeElement);
     }
 
-    function plotBoxPlot(params) {
-        Highcharts.chart('box-plot', {
-
-            chart: {
-                type: 'boxplot'
-            },
-            title: {
-                text: params.title
-            },
-            legend: {
-                enabled: false
-            },
-            xAxis: {
-                categories: params.categories,
-                title: {
-                    text: params.xAxisLabel
-                }
-            },
-            yAxis: {
-                title: {
-                    text: params.yAxisLabel
-                }
-            },
-            series: [{
-                name: params.yAxisLabel,
-                data: params.data,
-                color: Highcharts.getOptions().colors[0],
-                tooltip: {
-                    headerFormat: 'Item: <em>{point.key}</em><br/>'
-                }
-            }, {
-                name: 'Outlier',
-                color: Highcharts.getOptions().colors[0],
-                type: 'scatter',
-                data: params.outliers,
-                marker: {
-                    fillColor: '#7CB5EC',
-                    lineWidth: 1,
-                    lineColor: Highcharts.getOptions().colors[0]
-                },
-                tooltip: {
-                    pointFormat: 'Observation: {point.y}'
-                }
-            }]
-
-        });
-    }
-
     function plotBtnClick() {
-        const params = {
-            title: page.querySelector("input.plot-title-input").value.trim(),
-            yAxisLabel: page.querySelector("input.y-title-input").value.trim(),
-            xAxisLabel: page.querySelector("input.x-title-input").value.trim(),
-            categories: [],
-            outliers: [],
-            data: []
-        };
 
         function validateOutliers(splits) {
             let i, j, temp, errorMsg = "",
@@ -261,27 +215,23 @@ function doFirstPage() {
             }
         }
 
+        params.title = page.querySelector("input.plot-title-input").value.trim();
+        params.yAxisLabel = page.querySelector("input.y-title-input").value.trim();
+        params.xAxisLabel = page.querySelector("input.x-title-input").value.trim();
         alertDiv.classList.add("d-none");
+        
         if (validateTable()) {
-            plotBoxPlot(params);
-            plotDiv.classList.remove("d-none");
+            addRowBtn.removeEventListener("click", addRow);
+            deleteRowBtn.removeEventListener("click", deleteRow);
+            plotBtn.removeEventListener("click", plotBtnClick);
+            Utility.fadeOut(page)
+                .then(doPlotPage);
         }
         else {
             plotDiv.classList.add("d-none");
         }
-
-        /* const results = validateTable();
-        if(results.ok){
-            params.categories = results.categories;
-            params.data = results.overallData;
-            Utility.fadeIn(plotDiv)
-                .then(() => plotBoxPlot(params));
-        }
-        else{
-            Utility.fadeOut(plotDiv);
-        }
-        getOutliers(); */
     }
+
 
     Utility.fadeIn(page)
         .then(() => {
@@ -292,13 +242,81 @@ function doFirstPage() {
         });
 }
 
+
+
+function doPlotPage() {
+    const page = document.getElementById("plot-page");
+    const backBtn = page.querySelector(".back");
+
+    function backBtnClick() {
+        backBtn.removeEventListener("click", backBtnClick);
+        Utility.fadeOut(page)
+            .then(doFirstPage);
+    }
+
+    function plotBoxPlot(params) {
+        Highcharts.chart('box-plot', {
+
+            chart: {
+                type: 'boxplot'
+            },
+            title: {
+                text: params.title
+            },
+            legend: {
+                enabled: false
+            },
+            xAxis: {
+                categories: params.categories,
+                title: {
+                    text: params.xAxisLabel
+                }
+            },
+            yAxis: {
+                title: {
+                    text: params.yAxisLabel
+                }
+            },
+            series: [{
+                name: params.yAxisLabel,
+                data: params.data,
+                color: Highcharts.getOptions().colors[0],
+                tooltip: {
+                    headerFormat: 'Item: <em>{point.key}</em><br/>'
+                }
+            }, {
+                name: 'Outlier',
+                color: Highcharts.getOptions().colors[0],
+                type: 'scatter',
+                data: params.outliers,
+                marker: {
+                    fillColor: '#7CB5EC',
+                    lineWidth: 1,
+                    lineColor: Highcharts.getOptions().colors[0]
+                },
+                tooltip: {
+                    pointFormat: 'Observation: {point.y}'
+                }
+            }]
+
+        });
+    }
+
+    backBtn.addEventListener("click", backBtnClick);
+
+    Utility.fadeIn(page)
+        .then(() => {
+            plotBoxPlot(params);
+        });
+}
+
 function run() {
     console.log("Running.");
     /* const browser = navigator.userAgent.trim().replace(/,/g, ';');
     $.post("count.php",{browser:  browser},function(response){ 
         console.log("Server response: " + response);
     }); */
-    log();
+    //log();
     doFirstPage();
 }
 

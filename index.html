@@ -59,8 +59,7 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text px-4">X Axis Label</span>
-                <input type="text" class="form-control x-title-input"
-                    placeholder="Enter your X-axis label here">
+                <input type="text" class="form-control x-title-input" placeholder="Enter your X-axis label here">
             </div>
             <table id="table1" class="table table-bordered">
                 <thead class="table-light">
@@ -92,10 +91,20 @@
                 <button type="button" class="btn btn-primary delete-row">Delete Last Row</button>
                 <button type="button" class="btn btn-primary plot">Plot</button>
             </div>
-            <div id="box-plot" class="d-none my-2">
-            </div>
         </div>
         <!----------------------------------------------------------------------------------------------------->
+        <div class="page-content" id="plot-page">
+            <div id="box-plot" class="m-2">
+            </div>
+            <div class="alert alert-info text-center my-2">
+                When you are happy with your plot
+                you can print or download it by clicking the<span class="px-2"><img src="bars-black.png"
+                        alt=""></span>icon at the top right corner of the plot.
+            </div>
+            <div class="text-center">
+                <button type="button" class="btn btn-primary back">Back</button>
+            </div>
+        </div>
         <div class="jumbotron">
             <div class="row">
                 <div class="col-sm-6">
